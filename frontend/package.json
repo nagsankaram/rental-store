@@ -1,0 +1,10 @@
+{
+  "name": "rental-store-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend placeholder for the rental store application",
+  "scripts": {
+    "dev": "echo 'Add frontend dev script'",
+    "build": "echo 'Add frontend build script'"
+  }
+}
