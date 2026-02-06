@@ -7,6 +7,10 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/', (_req, res) => {
+  res.json({ message: 'Rental store service' });
+});
+
 app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`Server listening on port ${port}`);
