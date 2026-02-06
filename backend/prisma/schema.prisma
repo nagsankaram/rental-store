@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String?
+  password          String
+  role              Role               @default(RENTER)
+  createdAt         DateTime           @default(now())
+  vendor            Vendor?
+  bookings          Booking[]          @relation("UserBookings")
+  leaseApplications LeaseApplication[] @relation("UserLeaseApplications")
+}
+
+model Vendor {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique
+  companyName String
+  kycStatus   KycStatus @default(PENDING)
+  listings    Listing[]
+  createdAt   DateTime  @default(now())
+}
+
+model Listing {
+  id                String             @id @default(cuid())
+  vendor            Vendor             @relation(fields: [vendorId], references: [id])
+  vendorId          String
+  title             String
+  description       String?
+  category          String
+  dailyRate         Float
+  condition         String
+  location          String
+  createdAt         DateTime           @default(now())
+  isActive          Boolean            @default(true)
+  bookings          Booking[]
+  leaseApplications LeaseApplication[]
+}
+
+model Booking {
+  id          String          @id @default(cuid())
+  listing     Listing         @relation(fields: [listingId], references: [id])
+  listingId   String
+  renter      User            @relation("UserBookings", fields: [renterId], references: [id])
+  renterId    String
+  startDate   DateTime
+  endDate     DateTime
+  totalAmount Float
+  status      BookingStatus   @default(PENDING)
+  createdAt   DateTime        @default(now())
+  transaction Transaction?
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  bookingId   String   @unique
+  amount      Float
+  providerRef String?
+  status      TxStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+}
+
+model LeaseApplication {
+  id           String      @id @default(cuid())
+  listing      Listing     @relation(fields: [listingId], references: [id])
+  listingId    String
+  renter       User        @relation("UserLeaseApplications", fields: [renterId], references: [id])
+  renterId     String
+  tenureMonths Int
+  monthlyAmount Float
+  status       LeaseStatus @default(APPLIED)
+  createdAt    DateTime    @default(now())
+}
+
+enum Role {
+  RENTER
+  VENDOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum LeaseStatus {
+  APPLIED
+  APPROVED
+  REJECTED
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
